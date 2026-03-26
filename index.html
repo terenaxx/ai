@@ -4,49 +4,283 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Terenax AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
     <style>
-        :root { --bg: #0b0e14; --panel: #161b22; --accent: #00a8ff; --text: #e6edf3; --user: #1f6feb; --ai: #21262d; }
-        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
-        
-        /* TERENAX AI REKLAM BANDI */
-        #ad { background: #1f2937; text-align: center; padding: 15px; border-bottom: 1px solid #374151; box-shadow: 0 2px 10px rgba(0,0,0,0.3); }
-        #ad h2 { margin: 0; font-size: 18px; color: var(--accent); letter-spacing: 1px; }
-        #ad p { margin: 5px 0 0; font-size: 12px; opacity: 0.8; }
+        :root {
+            --bg: #060810;
+            --panel: #0d1117;
+            --accent: #00c8ff;
+            --accent2: #7b5cff;
+            --text: #e6edf3;
+            --user: #1a3a6e;
+            --ai: #131820;
+            --border: #1e2733;
+        }
 
-        #chat { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 12px; scroll-behavior: smooth; }
-        .msg { max-width: 80%; padding: 12px 16px; border-radius: 20px; font-size: 15px; line-height: 1.4; word-wrap: break-word; }
-        .u { align-self: flex-end; background: var(--user); color: white; border-bottom-right-radius: 4px; }
-        .a { align-self: flex-start; background: var(--ai); border-bottom-left-radius: 4px; }
-        
-        #input-area { background: var(--panel); padding: 15px; display: flex; gap: 10px; border-top: 1px solid #30363d; padding-bottom: env(safe-area-inset-bottom); }
-        input { flex: 1; background: #0d1117; border: 1px solid #30363d; color: white; padding: 12px 18px; border-radius: 30px; outline: none; font-size: 16px; }
-        button { background: var(--accent); border: none; color: white; padding: 0 20px; border-radius: 30px; cursor: pointer; font-weight: bold; transition: 0.2s; }
-        button:active { opacity: 0.7; }
-        .loader { font-style: italic; opacity: 0.5; font-size: 13px; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Animated background */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 60% 40% at 20% 10%, rgba(0, 200, 255, 0.06) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 30% at 80% 80%, rgba(123, 92, 255, 0.06) 0%, transparent 60%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* HEADER */
+        #header {
+            position: relative;
+            z-index: 10;
+            background: rgba(13, 17, 23, 0.9);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+            box-shadow: 0 0 15px rgba(0, 200, 255, 0.3);
+        }
+
+        .header-text h1 {
+            font-family: 'Orbitron', monospace;
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--accent);
+            letter-spacing: 2px;
+        }
+
+        .header-text p {
+            font-size: 10px;
+            color: rgba(230, 237, 243, 0.4);
+            letter-spacing: 1px;
+            margin-top: 1px;
+        }
+
+        .status-dot {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            color: #22c55e;
+        }
+
+        .status-dot::before {
+            content: '';
+            width: 7px;
+            height: 7px;
+            background: #22c55e;
+            border-radius: 50%;
+            box-shadow: 0 0 8px #22c55e;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        /* CHAT */
+        #chat {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            scroll-behavior: smooth;
+            position: relative;
+            z-index: 1;
+        }
+
+        #chat::-webkit-scrollbar { width: 4px; }
+        #chat::-webkit-scrollbar-track { background: transparent; }
+        #chat::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+        .msg-wrap {
+            display: flex;
+            flex-direction: column;
+            animation: fadeUp 0.3s ease;
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .msg-wrap.user { align-items: flex-end; }
+        .msg-wrap.ai { align-items: flex-start; }
+
+        .msg-label {
+            font-size: 10px;
+            letter-spacing: 1px;
+            opacity: 0.4;
+            margin-bottom: 4px;
+            font-family: 'Orbitron', monospace;
+        }
+
+        .msg {
+            max-width: 82%;
+            padding: 12px 16px;
+            border-radius: 16px;
+            font-size: 14px;
+            line-height: 1.6;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+        }
+
+        .msg.user {
+            background: linear-gradient(135deg, #1a3a6e, #0e2448);
+            border: 1px solid rgba(0, 200, 255, 0.2);
+            border-bottom-right-radius: 4px;
+            color: #e6edf3;
+        }
+
+        .msg.ai {
+            background: var(--ai);
+            border: 1px solid var(--border);
+            border-bottom-left-radius: 4px;
+            color: #cdd6e0;
+        }
+
+        /* Loader dots */
+        .loader-dots {
+            display: flex;
+            gap: 5px;
+            padding: 14px 18px;
+            background: var(--ai);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            border-bottom-left-radius: 4px;
+        }
+
+        .loader-dots span {
+            width: 7px;
+            height: 7px;
+            background: var(--accent);
+            border-radius: 50%;
+            animation: bounce 1.2s infinite;
+            opacity: 0.6;
+        }
+
+        .loader-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .loader-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes bounce {
+            0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+            40% { transform: translateY(-6px); opacity: 1; }
+        }
+
+        /* INPUT AREA */
+        #input-area {
+            position: relative;
+            z-index: 10;
+            background: rgba(13, 17, 23, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 14px 16px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            padding-bottom: max(14px, env(safe-area-inset-bottom));
+        }
+
+        #in {
+            flex: 1;
+            background: var(--ai);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 12px 18px;
+            border-radius: 30px;
+            outline: none;
+            font-size: 15px;
+            font-family: 'Inter', sans-serif;
+            transition: border-color 0.2s;
+        }
+
+        #in:focus {
+            border-color: rgba(0, 200, 255, 0.4);
+            box-shadow: 0 0 0 3px rgba(0, 200, 255, 0.08);
+        }
+
+        #in::placeholder { color: rgba(230, 237, 243, 0.25); }
+
+        #btn {
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            border: none;
+            color: white;
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.15s, opacity 0.15s;
+            box-shadow: 0 0 15px rgba(0, 200, 255, 0.25);
+            flex-shrink: 0;
+        }
+
+        #btn:active { transform: scale(0.92); opacity: 0.8; }
+        #btn:disabled { opacity: 0.4; cursor: not-allowed; }
     </style>
 </head>
 <body>
 
-<div id="ad">
-    <h2>TERENAX AI</h2>
-    <p>Geleceğin Zekası, Bugün Sizinle.</p>
+<div id="header">
+    <div class="logo-icon">⚡</div>
+    <div class="header-text">
+        <h1>TERENAX AI</h1>
+        <p>GELECEĞIN ZEKASı, BUGÜN SİZİNLE</p>
+    </div>
+    <div class="status-dot">Çevrimiçi</div>
 </div>
 
 <div id="chat">
-    <div class="msg a">Merhaba! Terenax AI asistanınız hazır. Size nasıl yardımcı olabilirim?</div>
+    <div class="msg-wrap ai">
+        <div class="msg-label">TERENAX AI</div>
+        <div class="msg ai">Merhaba! Ben Terenax AI asistanınız. Size nasıl yardımcı olabilirim? 🚀</div>
+    </div>
 </div>
 
 <div id="input-area">
-    <input type="text" id="in" placeholder="Bir şeyler yazın..." autocomplete="off">
-    <button id="btn">GÖNDER</button>
+    <input type="text" id="in" placeholder="Mesajınızı yazın..." autocomplete="off">
+    <button id="btn">➤</button>
 </div>
 
 <script type="importmap">
-  {
+{
     "imports": {
-      "@google/generative-ai": "https://esm.run/@google/generative-ai"
+        "@google/generative-ai": "https://esm.run/@google/generative-ai"
     }
-  }
+}
 </script>
 
 <script type="module">
@@ -54,54 +288,65 @@
 
     const API_KEY = "AIzaSyBQBPBE8-W1sAftXrqxtDodluuCZ-Xja1g";
     const genAI = new GoogleGenerativeAI(API_KEY);
-    
-    // En hızlı ve free sürüm olan gemini-1.5-flash'ı SDK üzerinden çağırıyoruz
-    const model = genAI.getGenerativeModel({ 
-        model: "gemini-1.5-flash",
-        systemInstruction: "Senin adın Terenax AI Asistan. Sen Terenax AI tarafından geliştirildin. Asla Google veya Gemini olduğunu söyleme. Kimliğini sorduklarında Terenax AI vurgusu yap."
+
+    const model = genAI.getGenerativeModel({
+        model: "gemini-2.0-flash",
+        systemInstruction: "Senin adın Terenax AI Asistan. Sen Terenax AI tarafından geliştirildin. Asla Google veya Gemini olduğunu söyleme. Kimliğini sorduklarında Terenax AI vurgusu yap. Türkçe konuş."
     });
 
-    const chatContainer = document.getElementById('chat');
-    const inputField = document.getElementById('in');
-    const sendBtn = document.getElementById('btn');
+    const chat = model.startChat({ history: [] });
+
+    const chatEl = document.getElementById('chat');
+    const inputEl = document.getElementById('in');
+    const btnEl = document.getElementById('btn');
 
     async function gonder() {
-        const text = inputField.value.trim();
+        const text = inputEl.value.trim();
         if (!text) return;
 
-        ekle(text, 'u');
-        inputField.value = '';
+        ekle(text, 'user');
+        inputEl.value = '';
+        btnEl.disabled = true;
 
-        const load = document.createElement('div');
-        load.className = 'msg a loader';
-        load.innerText = 'Terenax AI düşünüyor...';
-        chatContainer.appendChild(load);
-        chatContainer.scrollTop = chatContainer.scrollHeight;
+        // Loader
+        const loaderWrap = document.createElement('div');
+        loaderWrap.className = 'msg-wrap ai';
+        loaderWrap.innerHTML = `
+            <div class="msg-label">TERENAX AI</div>
+            <div class="loader-dots"><span></span><span></span><span></span></div>
+        `;
+        chatEl.appendChild(loaderWrap);
+        chatEl.scrollTop = chatEl.scrollHeight;
 
         try {
-            const result = await model.generateContent(text);
+            const result = await chat.sendMessage(text);
             const response = await result.response;
             const output = response.text();
-            
-            load.remove();
-            ekle(output, 'a');
-        } catch (error) {
-            load.remove();
-            console.error(error);
-            ekle("Hata: " + error.message, 'a');
+            loaderWrap.remove();
+            ekle(output, 'ai');
+        } catch (err) {
+            loaderWrap.remove();
+            ekle("⚠️ Hata: " + err.message, 'ai');
         }
+
+        btnEl.disabled = false;
+        inputEl.focus();
     }
 
-    function ekle(m, t) {
-        const d = document.createElement('div');
-        d.className = `msg ${t}`;
-        d.innerText = m;
-        chatContainer.appendChild(d);
-        chatContainer.scrollTop = chatContainer.scrollHeight;
+    function ekle(metin, tip) {
+        const wrap = document.createElement('div');
+        wrap.className = `msg-wrap ${tip}`;
+        const label = tip === 'user' ? 'SİZ' : 'TERENAX AI';
+        wrap.innerHTML = `<div class="msg-label">${label}</div><div class="msg ${tip}"></div>`;
+        wrap.querySelector('.msg').textContent = metin;
+        chatEl.appendChild(wrap);
+        chatEl.scrollTop = chatEl.scrollHeight;
     }
 
-    sendBtn.onclick = gonder;
-    inputField.onkeypress = (e) => { if (e.key === 'Enter') gonder(); };
+    btnEl.onclick = gonder;
+    inputEl.addEventListener('keydown', e => {
+        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); gonder(); }
+    });
 </script>
 
 </body>
