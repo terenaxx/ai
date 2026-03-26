@@ -30,8 +30,8 @@
 <script>
     const KEY = "AIzaSyBQBPBE8-W1sAftXrqxtDodluuCZ-Xja1g";
     
-    // Hata veren flash sürümü yerine %100 garantili gemini-pro sürümü eklendi
-    const URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${KEY}`;
+    // v1beta YERİNE v1 KULLANILDI VE 1.5-FLASH MODELİNE GEÇİLDİ
+    const URL = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${KEY}`;
 
     const chat = document.getElementById('chat');
     const input = document.getElementById('in');
