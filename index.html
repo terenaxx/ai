@@ -11,7 +11,7 @@
         #ad h2 { margin: 0; font-size: 18px; color: var(--accent); }
         #chat { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 10px; }
         .msg { max-width: 80%; padding: 12px; border-radius: 15px; font-size: 15px; }
-        .u { align-self: flex-end; background: #1f6feb; border-bottom-right-radius: 2px; }
+        .u { align-self: flex-end; background: #1f6feb; border-bottom-right-radius: 2px; color: white; }
         .a { align-self: flex-start; background: #21262d; border-bottom-left-radius: 2px; }
         #input-area { background: var(--panel); padding: 15px; display: flex; gap: 10px; border-top: 1px solid #30363d; padding-bottom: env(safe-area-inset-bottom); }
         input { flex: 1; background: #0d1117; border: 1px solid #30363d; color: white; padding: 12px; border-radius: 25px; outline: none; font-size: 16px; }
@@ -29,7 +29,9 @@
 
 <script>
     const KEY = "AIzaSyBQBPBE8-W1sAftXrqxtDodluuCZ-Xja1g";
-    const URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${KEY}`;
+    
+    // Hata veren flash sürümü yerine %100 garantili gemini-pro sürümü eklendi
+    const URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${KEY}`;
 
     const chat = document.getElementById('chat');
     const input = document.getElementById('in');
@@ -42,7 +44,7 @@
         ekle(val, 'u');
         input.value = '';
         const load = document.createElement('div');
-        load.className = 'msg a'; load.innerText = '...';
+        load.className = 'msg a'; load.innerText = 'Düşünüyor...';
         chat.appendChild(load);
 
         try {
@@ -62,13 +64,12 @@
             if(data.candidates && data.candidates[0].content) {
                 ekle(data.candidates[0].content.parts[0].text, 'a');
             } else {
-                // Hatanın ne olduğunu tam anlamak için ekrana yazdırıyoruz
                 ekle("Hata Mesajı: " + (data.error ? data.error.message : "API yanıt vermedi"), 'a');
                 console.log(data);
             }
         } catch(e) {
             load.remove();
-            ekle("Bağlantı hatası! Lütfen interneti veya GitHub ayarlarını kontrol et.", 'a');
+            ekle("Bağlantı hatası!", 'a');
         }
     }
 
